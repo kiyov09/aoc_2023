@@ -9,14 +9,15 @@ type digits =
 
 (* given a digits, return the correspondint int *)
 let int_of_digits d =
-  match d with
-  | { first = -1; last = -1 } -> 0
-  | { first; last } -> (first * 10) + last
+  let { first; last } = d in
+  (first * 10) + last
 ;;
 
 (** accumulate into a digits the digits of a line *)
 let fold_fn acc c =
-  if acc.first = -1 then { first = c; last = c } else { acc with last = c }
+  match acc with
+  | None -> Some { first = c; last = c }
+  | Some acc -> Some { acc with last = c }
 ;;
 
 (** given a line (string), process each line in the following way:
@@ -27,7 +28,7 @@ let digits_of_string s =
   s
   |> Utils.char_list_of_string
   |> List.filter_map Utils.int_of_digit_char
-  |> List.fold_left fold_fn { first = -1; last = -1 }
+  |> List.fold_left fold_fn None
 ;;
 
 (** given a list of chars, return a tuple containing an optional int and the rest
@@ -58,17 +59,14 @@ let next_int lst =
 (** given a line (string), process each line, this time taking into account that
     some digits may be written in words *)
 let digits_of_string' s =
-  s
-  |> Utils.char_list_of_string
-  |> Seq.unfold next_int
-  |> Seq.fold_left fold_fn { first = -1; last = -1 }
+  s |> Utils.char_list_of_string |> Seq.unfold next_int |> Seq.fold_left fold_fn None
 ;;
 
 (* common function to solve both parts *)
 let common file fn =
   file
   |> Utils.read_input
-  |> List.map fn
+  |> List.filter_map fn
   |> List.map int_of_digits
   |> List.fold_left ( + ) 0
 ;;
