@@ -11,38 +11,50 @@ let rec n_times fn n x = if n = 0 then x else n_times fn (n - 1) (fn x)
 module IntSet = Set.Make (Int)
 module IntMap = Map.Make (Int)
 
+(* creates a map with keys from 1 to n, all with the value of 1 *)
+let map_of_int n = List.init n (fun i -> i + 1, 1) |> List.to_seq |> IntMap.of_seq
+
+(* fold the values of a map by using fn and init as the initial value *)
+let fold_map_values fn init map =
+  IntMap.bindings map |> List.map snd |> List.fold_left fn init
+;;
+
 (* scratchcard *)
-type card =
-  { winning : IntSet.t
-  ; mine : IntSet.t
-  }
+module Card = struct
+  type t =
+    { winning : IntSet.t
+    ; mine : IntSet.t
+    }
 
-(* build an empty card, which is a card with no winning numbers and no mine numbers *)
-let empty_card = { winning = IntSet.empty; mine = IntSet.empty }
+  (* build an empty card, which is a card with no winning numbers and no mine numbers *)
+  let empty = { winning = IntSet.empty; mine = IntSet.empty }
 
-(* the number of matching numbers is the intersection of the winning numbers and the mine numbers *)
-let no_of_matching c =
-  let { winning; mine } = c in
-  IntSet.inter winning mine |> IntSet.elements |> List.length
-;;
+  (* accumulate the sets in a card *)
+  let acc_card acc n =
+    if IntSet.is_empty acc.winning
+    then { acc with winning = n }
+    else { acc with mine = n }
+  ;;
 
-(* the points of a card is 0 if there are no matching numbers, otherwise is the
-   result of starting from 1 and doubling it n-1 times, where n is the number of matching numbers *)
-let points_of_card c =
-  let n = no_of_matching c in
-  if n = 0 then 0 else n_times double (n - 1) 1
-;;
+  (* the number of matching numbers is the intersection of the winning numbers and the mine numbers *)
+  let no_of_matching { winning; mine } =
+    IntSet.inter winning mine |> IntSet.elements |> List.length
+  ;;
 
-(* parsing section *)
+  (* the points of a card is 0 if there are no matching numbers, otherwise is the
+     result of starting from 1 and doubling it n-1 times, where n is the number of matching numbers *)
+  let points_of_card t =
+    match no_of_matching t with
+    | 0 -> 0
+    | n -> n_times double (n - 1) 1
+  ;;
+end
+
+(* start parsing section *)
 
 (* make a set from a string of numbers separated by spaces *)
 let make_set s =
   s |> String.split_on_char ' ' |> List.filter_map int_of_string_opt |> IntSet.of_list
-;;
-
-(* accumulate the sets in a card *)
-let acc_card acc n =
-  if IntSet.is_empty acc.winning then { acc with winning = n } else { acc with mine = n }
 ;;
 
 (* process a line of the input file, giving a card as a result *)
@@ -53,7 +65,7 @@ let process_card_line line =
   |> reverse_nth 1
   |> String.split_on_char '|'
   |> List.map make_set
-  |> List.fold_left acc_card empty_card
+  |> List.fold_left Card.acc_card Card.empty
 ;;
 
 (* end parsing section *)
@@ -64,7 +76,7 @@ let common file = Utils.read_input file |> List.map process_card_line
 (* solution of the part 1 *)
 (* process each line of the input to get a card, then get the points of each card
    and sum them all *)
-let part1 = common input_file |> List.map points_of_card |> List.fold_left ( + ) 0
+let part1 = common input_file |> List.map Card.points_of_card |> List.fold_left ( + ) 0
 
 (* increase the value of the cards with id from id+1 to id+n by the value of the card with id *)
 let increase_following_n_cards map (id, n) =
@@ -81,19 +93,11 @@ let increase_following_n_cards map (id, n) =
     ids_to_incr
 ;;
 
-(* creates a map with keys from 1 to n, all with the value of 1 *)
-let map_of_int n = List.init n (fun i -> i + 1, 1) |> List.to_seq |> IntMap.of_seq
-
-(* fold the values of a map by using fn and init as the initial value *)
-let fold_map_values fn init map =
-  IntMap.bindings map |> List.map snd |> List.fold_left fn init
-;;
-
 (* solution of the part 2 *)
 let part2 =
   let with_ids =
     (* Utils.read_input input_test_2 *)
-    common input_file |> List.map no_of_matching |> List.mapi (fun i n -> i + 1, n)
+    common input_file |> List.map Card.no_of_matching |> List.mapi (fun i n -> i + 1, n)
   in
   let init_map = List.length with_ids |> map_of_int in
   with_ids
