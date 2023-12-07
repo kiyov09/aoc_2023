@@ -20,5 +20,8 @@ let read_all ch =
 (** turn a string into a list of chars *)
 let char_list_of_string s = s |> String.to_seq |> List.of_seq
 
+(** whitespace split a string *)
+let split_ws s = s |> String.split_on_char ' ' |> List.filter (fun s -> s <> "")
+
 (** Read all lines from a file given its path *)
 let read_input input_file = open_in input_file |> read_all
