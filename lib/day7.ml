@@ -66,23 +66,24 @@ let hand_type_of_hand hand =
     |> Seq.group (fun c1 c2 -> cmp_c c1 c2 = 0)
     (* make everything a list of lists *)
     |> List.of_seq
-    |> List.map List.of_seq
-    (* Sort it by the length of each list in descending order *)
-    |> List.sort (fun g1 g2 -> compare (List.length g2) (List.length g1))
+    (* make inner list to its length *)
+    |> List.map (fun s -> Seq.length s)
+    (* and sort everything in descending order *)
+    |> List.sort (fun g1 g2 -> compare g2 g1)
   in
   match gouped with
   (* a group of 5 *)
-  | [ [ _; _; _; _; _ ] ] -> FiveOfAKind
+  | [ 5 ] -> FiveOfAKind
   (* a group of 4 and a group of 1 *)
-  | [ [ _; _; _; _ ]; [ _ ] ] -> FourOfAKind
+  | [ 4; 1 ] -> FourOfAKind
   (* a group of 3 and a group of 2 *)
-  | [ [ _; _; _ ]; [ _; _ ] ] -> FullHouse
+  | [ 3; 2 ] -> FullHouse
   (* a group of 3 and 2 groups of 1 *)
-  | [ [ _; _; _ ]; [ _ ]; [ _ ] ] -> ThreeOfAKind
+  | [ 3; 1; 1 ] -> ThreeOfAKind
   (* 2 groups of 2 *)
-  | [ [ _; _ ]; [ _; _ ]; [ _ ] ] -> TwoPair
+  | [ 2; 2; 1 ] -> TwoPair
   (* 1 group of 2 and 3 groups of 1 *)
-  | [ [ _; _ ]; [ _ ]; [ _ ]; [ _ ] ] -> OnePair
+  | [ 2; 1; 1; 1 ] -> OnePair
   (* 5 groups of 1 *)
   | _ -> HighCard
 ;;
