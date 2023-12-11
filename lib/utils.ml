@@ -25,3 +25,10 @@ let split_ws s = s |> String.split_on_char ' ' |> List.filter (fun s -> s <> "")
 
 (** Read all lines from a file given its path *)
 let read_input input_file = open_in input_file |> read_all
+
+(** skip n items in a list *)
+let rec skip n = function
+  | [] -> []
+  | _ :: xs when n > 0 -> skip (n - 1) xs
+  | xs -> xs
+;;
