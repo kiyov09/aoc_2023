@@ -21,5 +21,8 @@ let () =
   Printf.printf "Part 2: %d\n" AoC.Day6.part2;
   print_endline "\nDay 7\n---------------";
   Printf.printf "Part 1: %d\n" AoC.Day7.part1;
-  Printf.printf "Part 2: %d\n" AoC.Day7.part2
+  Printf.printf "Part 2: %d\n" AoC.Day7.part2;
+  print_endline "\nDay 8\n---------------";
+  Printf.printf "Part 1: %d\n" AoC.Day8.part1;
+  Printf.printf "Part 2: %d\n" AoC.Day8.part2
 ;;
