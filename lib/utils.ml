@@ -32,3 +32,6 @@ let rec skip n = function
   | _ :: xs when n > 0 -> skip (n - 1) xs
   | xs -> xs
 ;;
+
+(* turn a string consisting of space separated numbers into a list of ints *)
+let parse_line_of_nums line = line |> split_ws |> List.map int_of_string
