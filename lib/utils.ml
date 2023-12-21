@@ -35,3 +35,6 @@ let rec skip n = function
 
 (* turn a string consisting of space separated numbers into a list of ints *)
 let parse_line_of_nums line = line |> split_ws |> List.map int_of_string
+
+(* sum a list of ints *)
+let sum = List.fold_left ( + ) 0
